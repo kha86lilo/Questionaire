@@ -1,0 +1,48 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls; 
+
+public partial class AddUsers : Page
+{
+    protected string SuccessMessage
+    {
+        get;
+        private set;
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!Page.IsPostBack)
+        { 
+            BindGrid();
+        }
+    } 
+    private void BindGrid()
+    {
+
+        using (DocTrackerEntitiesAdmin context = new DocTrackerEntitiesAdmin())
+        {
+            if (string.IsNullOrEmpty(Request.QueryString["ID"]) && User.IsInRole("Admin"))
+            {
+                  GridView1.DataSource = context.Log.ToList();
+                 
+            }
+            else
+            {
+                string usrName = Request.QueryString["ID"];
+                GridView1.DataSource = context.Log.Where(lg => lg.Users.UserName == usrName).ToList() ;
+
+            }
+            GridView1.DataBind();
+        }
+
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        GridView1.PageIndex = e.NewPageIndex;
+        BindGrid(); //bindgridview will get the data source and bind it again
+    }
+}
